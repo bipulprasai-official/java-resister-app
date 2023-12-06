@@ -1,8 +1,8 @@
 pipeline {
-    agent { label 'Jenkins-Agent' }
+    agent { label 'jenkins-agent' }
     tools {
-        jdk 'Java17'
-        maven 'maven3'
+        jdk 'java17'
+        maven 'Maven3'
     }
     stages{
         stage("cleanup workspace"){
@@ -27,9 +27,9 @@ pipeline {
             steps {
                 sh "mvn test"
             }
-        } 
-        
-       stage("Sonarqube Analysis"){
+        }
+
+        stage("Sonarqube Analysis"){
             steps {
                 script {
                     withSonarQubeEnv(credentialsId: 'jenkins-sonarqube-token'){
@@ -38,8 +38,16 @@ pipeline {
                 }
             }
         }
-   
-        
+
+        stage("Quality Gate"){
+           steps {
+               script {
+                    waitForQualityGate abortPipeline: false, credentialsId: 'jenkins-sonarqube-token'
+                }	
+            }
+
+        }
+
 
     }	
 }
